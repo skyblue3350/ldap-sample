@@ -59,6 +59,7 @@ objectClass: inetOrgPerson
 loginShell: /bin/bash
 homeDirectory: /home/testuser1
 userPassword: pass1
+mail: testuser1@$LDAP_DOMAIN
 uidNumber: 2001
 gidNumber: 1000
 
@@ -72,6 +73,7 @@ objectClass: inetOrgPerson
 loginShell: /bin/bash
 homeDirectory: /home/testuser2
 userPassword: pass2
+mail: testuser2@$LDAP_DOMAIN
 uidNumber: 2002
 gidNumber: 1000
 EOS" | :
