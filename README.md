@@ -15,10 +15,10 @@ OUは以下の2つを用意
 
 - testuser1
   - pass: pass1
-  - groups: testgroup1, testgroup2
+  - groups: members, admin
 - testuser2
   - pass: pass2
-  - groups: testgroup2
+  - groups: members
 
 グループは下記の2グループ用意
 
