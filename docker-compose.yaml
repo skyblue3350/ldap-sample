@@ -1,6 +1,11 @@
 version: "3"
 
 services:
+  #################################
+  #
+  # LDAP
+  #
+  #################################
   # LDAPサーバ
   ldap-server:
     image: osixia/openldap
@@ -21,3 +26,96 @@ services:
       - ldap
     ports:
       - 22222:22
+
+  #################################
+  #
+  # Gitlab
+  #
+  #################################
+  redis:
+    restart: always
+    image: redis:6.2.6
+    command:
+    - --loglevel warning
+    volumes:
+    - redis-data:/data:Z
+
+  postgresql:
+    restart: always
+    image: sameersbn/postgresql:12-20200524
+    volumes:
+    - postgresql-data:/var/lib/postgresql:Z
+    environment:
+    - DB_USER=gitlab
+    - DB_PASS=password
+    - DB_NAME=gitlabhq_production
+    - DB_EXTENSION=pg_trgm,btree_gist
+
+  gitlab:
+    restart: always
+    image: sameersbn/gitlab:15.8.1
+    depends_on:
+    - redis
+    - postgresql
+    ports:
+    - "8080:80"
+    - "10022:22"
+    volumes:
+    - gitlab-data:/home/git/data:Z
+    healthcheck:
+      test: ["CMD", "/usr/local/sbin/healthcheck"]
+      interval: 5m
+      timeout: 10s
+      retries: 3
+      start_period: 5m
+    environment:
+    - DEBUG=false
+
+    - DB_ADAPTER=postgresql
+    - DB_HOST=postgresql
+    - DB_PORT=5432
+    - DB_USER=gitlab
+    - DB_PASS=password
+    - DB_NAME=gitlabhq_production
+
+    - REDIS_HOST=redis
+    - REDIS_PORT=6379
+
+    - TZ=Asia/Tokyo
+    - GITLAB_TIMEZONE=Tokyo
+
+    - GITLAB_HTTPS=false
+    - SSL_SELF_SIGNED=false
+
+    - GITLAB_HOST=localhost
+    - GITLAB_PORT=10080
+    - GITLAB_SSH_PORT=10022
+    - GITLAB_RELATIVE_URL_ROOT=
+    - GITLAB_SECRETS_DB_KEY_BASE=long-and-random-alphanumeric-string
+    - GITLAB_SECRETS_SECRET_KEY_BASE=long-and-random-alphanumeric-string
+    - GITLAB_SECRETS_OTP_KEY_BASE=long-and-random-alphanumeric-string
+
+    - GITLAB_SIGNUP_ENABLED=false
+    - GITLAB_ROOT_PASSWORD=
+    - GITLAB_ROOT_EMAIL=
+
+    - GITLAB_NOTIFY_ON_BROKEN_BUILDS=true
+    - GITLAB_NOTIFY_PUSHER=false
+
+    - GITLAB_BACKUP_SCHEDULE=daily
+    - GITLAB_BACKUP_TIME=01:00
+
+    - LDAP_ENABLED=true
+    - LDAP_LABEL=sample.org
+    - LDAP_HOST=ldap-server
+    - LDAP_PORT=389
+    - LDAP_BASE=ou=users,dc=sample,dc=org
+    - LDAP_UID=uid
+    - LDAP_BIND_DN=cn=admin,dc=sample,dc=org
+    - LDAP_PASS=fuga
+    - LDAP_ACTIVE_DIRECTORY=false
+
+volumes:
+  redis-data:
+  postgresql-data:
+  gitlab-data:
