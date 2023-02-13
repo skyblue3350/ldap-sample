@@ -1,0 +1,23 @@
+version: "3"
+
+services:
+  # LDAPサーバ
+  ldap-server:
+    image: osixia/openldap
+    restart: always
+    env_file:
+      - ldap
+    ports:
+      - 389:389
+    # volumes:
+    # - ./ldap-server/ldap:/var/lib/ldap
+    # - ./ldap-server/config:/etc/ldap/slapd.d
+
+  # LDAP連携を利用したVM環境再現コンテナ
+  ldap-client:
+    build: ./ldap-client
+    restart: always
+    env_file:
+      - ldap
+    ports:
+      - 22222:22
